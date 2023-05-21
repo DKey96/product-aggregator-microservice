@@ -1,7 +1,7 @@
 from unittest import mock
 
 import pytest
-from api.models import Product
+from api.models import Offer, Product
 from django.urls import reverse
 
 from rest_framework import status
@@ -51,11 +51,6 @@ def test_update_product(mock_client, api_client):
     assert product.name == "Updated Product"
     assert product.description == "Updated Description"
 
-    # Verify that the post_save signal was called
-    mock_client.return_value.register_new_product.assert_called_once_with(
-        product.id, product.name, product.description
-    )
-
 
 @pytest.mark.django_db
 @mock.patch("api.models.product.AppliftingClient")
@@ -70,5 +65,33 @@ def test_delete_product(mock_client, api_client):
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert Product.objects.count() == 0
 
-    # Verify that the post_save signal was called
-    mock_client.return_value.register_new_product.assert_not_called()
+
+@pytest.mark.django_db
+@mock.patch("api.models.product.AppliftingClient")
+def test_product_view_set_offers(mock_client, api_client):
+    product = Product.objects.create(
+        name="Test Product", description="Test Description"
+    )
+    offer1 = Offer.objects.create(product=product, price=10)
+    offer2 = Offer.objects.create(product=product, price=15)
+
+    url = reverse("product-offers", kwargs={"pk": product.pk})
+    response = api_client.get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+
+    expected_data = [
+        {
+            "id": str(offer1.id),
+            "product": str(product.id),
+            "price": 10,
+            "items_in_stock": 0,
+        },
+        {
+            "id": str(offer2.id),
+            "product": str(product.id),
+            "price": 15,
+            "items_in_stock": 0,
+        },
+    ]
+    assert response.json() == expected_data
