@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "api",
+    "applifting_client",
 ]
 
 MIDDLEWARE = [
@@ -139,3 +140,5 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+APPLIFTING_REFRESH_TOKEN = "3d967f04-3392-41f0-bc06-8b6d1e5c26fd"
