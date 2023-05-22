@@ -1,0 +1,43 @@
+# Run `docker-compose build` to build an image for api and workers containers.
+# Run `docker-compose up` to run all containers.
+version: "3.4"
+services:
+  api:
+    build:
+      context: ./  # Adjust the context path if necessary
+      dockerfile: Dockerfile
+    restart: on-failure
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./product_aggregator_microservice:/app
+    environment:
+      - APPLIFTING_SERVICE_BASE_URL=https://python.exercise.applifting.cz/api/v1
+      - POSTGRES_NAME=applifting
+      - POSTGRES_USER=applifting
+      - POSTGRES_PASSWORD=applifting
+    networks:
+      - djangonetwork
+    depends_on:
+      - db
+    links:
+      - db
+  db:
+    image: postgres:12
+    container_name: db
+    environment:
+      - POSTGRES_NAME=applifting
+      - POSTGRES_USER=applifting
+      - POSTGRES_PASSWORD=applifting
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - djangonetwork
+volumes:
+  postgres_data:
+
+networks:
+      djangonetwork:
+          driver: bridge
