@@ -2,18 +2,27 @@ from unittest import mock
 
 import pytest
 from api.models import Offer, Product
+from django.contrib.auth.models import User
+from django.test import override_settings
 from django.urls import reverse
 
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 
 @pytest.fixture
 def api_client():
-    return APIClient()
+    client = APIClient()
+    # Add authentication credentials
+    user = User.objects.create_user(username="testuser", password="testpassword")
+    token = Token.objects.create(user=user)
+    client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+    return client
 
 
 @pytest.mark.django_db
+@override_settings(APPLIFTING_SERVICE_BASE_URL="http://test-service-url")
 @mock.patch("api.models.product.AppliftingClient")
 def test_create_product(mock_client, api_client):
     url = reverse("product-list")
@@ -35,6 +44,7 @@ def test_create_product(mock_client, api_client):
 
 
 @pytest.mark.django_db
+@override_settings(APPLIFTING_SERVICE_BASE_URL="http://test-service-url")
 @mock.patch("api.models.product.AppliftingClient")
 def test_update_product(mock_client, api_client):
     product = Product.objects.create(
@@ -53,6 +63,7 @@ def test_update_product(mock_client, api_client):
 
 
 @pytest.mark.django_db
+@override_settings(APPLIFTING_SERVICE_BASE_URL="http://test-service-url")
 @mock.patch("api.models.product.AppliftingClient")
 def test_delete_product(mock_client, api_client):
     product = Product.objects.create(
@@ -67,6 +78,7 @@ def test_delete_product(mock_client, api_client):
 
 
 @pytest.mark.django_db
+@override_settings(APPLIFTING_SERVICE_BASE_URL="http://test-service-url")
 @mock.patch("api.models.product.AppliftingClient")
 def test_product_view_set_offers(mock_client, api_client):
     product = Product.objects.create(
