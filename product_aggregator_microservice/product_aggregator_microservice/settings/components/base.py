@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "api",
     "drf_yasg",
     "applifting_client",
+    "authentication",
 ]
 
 MIDDLEWARE = [
@@ -77,7 +78,6 @@ WSGI_APPLICATION = "product_aggregator_microservice.wsgi.application"
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
-        "rest_framework.authentication.BasicAuthentication",
     ],
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
     "TEST_REQUEST_RENDERER_CLASSES": [
@@ -86,7 +86,9 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.TemplateHTMLRenderer",
     ],
     "EXCEPTION_HANDLER": "rest_framework.views.exception_handler",
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
+    ),
 }
 
 

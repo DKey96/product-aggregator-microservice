@@ -22,7 +22,6 @@ docs_schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path("auth/", include("rest_framework.urls")),
     path("v1/", include(router.urls)),
     re_path(
         r"docs/swagger(?P<format>\.json|\.yaml)$",
