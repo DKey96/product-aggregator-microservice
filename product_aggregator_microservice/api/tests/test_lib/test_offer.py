@@ -65,8 +65,7 @@ def test_get_and_create_products_offers_with_exception(
 
     assert Offer.objects.count() == 0
     assert (
-        f"Product with ID {product.id} does not exist in the Offer service."
-        in caplog.text
+        "There was an error with the communication to the Offer service." in caplog.text
     )
     assert mock_applifting_client.get_product_offers.called
 

@@ -2,7 +2,11 @@ import logging
 import uuid
 
 from api.models import Offer, Product
-from applifting_client.core.client import AppliftingClient, AppliftingException
+from applifting_client.core.client import (
+    AppliftingClient,
+    AppliftingException,
+    ProductDoesNotExist,
+)
 
 log = logging.getLogger(__name__)
 
@@ -27,10 +31,17 @@ def get_and_create_products_offers() -> None:
 def get_offers_by_product_uuid(product_uuid):
     try:
         offers = AppliftingClient().get_product_offers(product_uuid=str(product_uuid))
+    except ProductDoesNotExist:
+        log.error(
+            "Product with ID %s does not exist in the Offer service and will be deleted.",
+            product_uuid,
+        )
+        # Delete the object as it does not exist
+        Product.objects.get(id=product_uuid).delete()
+        offers = []
     except AppliftingException as e:
         log.error(
-            "Product with ID %s does not exist in the Offer service. Exception: %s",
-            product_uuid,
+            "There was an error with the communication to the Offer service. Exception: %s",
             e.message,
         )
         offers = []

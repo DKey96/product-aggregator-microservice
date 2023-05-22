@@ -16,6 +16,11 @@ class AppliftingException(Exception):
         self.message = message
 
 
+class ProductDoesNotExist(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
 class AppliftingClient:
     def __init__(self):
         self.refresh_token = settings.APPLIFTING_REFRESH_TOKEN
@@ -28,12 +33,16 @@ class AppliftingClient:
                 .order_by("-created_at")
                 .first()
             )
-            token = token_model.token
+            if token_model:
+                token = token_model.token
 
-            token_freshness = (
-                datetime.datetime.now(datetime.timezone.utc) - token_model.created_at
-            )
-            if token_freshness.total_seconds() >= APPLIFTING_TOKEN_VALIDITY:
+                token_freshness = (
+                    datetime.datetime.now(datetime.timezone.utc)
+                    - token_model.created_at
+                )
+                if token_freshness.total_seconds() >= APPLIFTING_TOKEN_VALIDITY:
+                    token = self.refresh_auth_token()
+            else:
                 token = self.refresh_auth_token()
         except ObjectDoesNotExist:
             token = self.refresh_auth_token()
@@ -67,7 +76,8 @@ class AppliftingClient:
             headers=headers,
             data=json.dumps(body),
         )
-        response.raise_for_status()
+        if response.status_code > 201:
+            raise AppliftingException(response.text, response.status_code)
 
     def get_product_offers(self, product_uuid: str) -> list[dict[str, str]]:
         headers = {
@@ -79,9 +89,8 @@ class AppliftingClient:
         )
         if response.status_code != 200:
             if response.status_code == 404:
-                self.get_product_offers(product_uuid)
-            else:
-                raise AppliftingException(response.text, response.status_code)
+                raise ProductDoesNotExist(response.text)
+            raise AppliftingException(response.text, response.status_code)
 
         offers = response.json()
         return offers
