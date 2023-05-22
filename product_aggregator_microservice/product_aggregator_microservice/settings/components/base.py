@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -145,3 +145,4 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 APPLIFTING_REFRESH_TOKEN = "3d967f04-3392-41f0-bc06-8b6d1e5c26fd"
+APPLIFTING_SERVICE_BASE_URL = os.environ.get("APPLIFTING_SERVICE_BASE_URL")

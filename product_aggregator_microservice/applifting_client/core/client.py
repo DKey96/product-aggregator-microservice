@@ -7,8 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework.utils import json
 
-APPLIFTING_API_URL = "https://python.exercise.applifting.cz/api/v1"
-APPLIFTING_TOKEN_VALIDITY = 5 * 60  # 5 minutes - 5s
+APPLIFTING_TOKEN_VALIDITY = 5 * 60  # 5 minutes
 
 
 class AppliftingException(Exception):
@@ -20,6 +19,7 @@ class AppliftingException(Exception):
 class AppliftingClient:
     def __init__(self):
         self.refresh_token = settings.APPLIFTING_REFRESH_TOKEN
+        self.base_url = settings.APPLIFTING_SERVICE_BASE_URL
 
     def get_valid_token(self) -> str:
         try:
@@ -41,7 +41,7 @@ class AppliftingClient:
 
     def refresh_auth_token(self) -> str:
         response = requests.post(
-            APPLIFTING_API_URL + "/auth", headers={"Bearer": self.refresh_token}
+            f"{self.base_url}/auth", headers={"Bearer": self.refresh_token}
         )
         if response.status_code != 201:
             raise AppliftingException(response.text, response.status_code)
@@ -63,7 +63,7 @@ class AppliftingClient:
         }
         body = {"id": str(product_uuid), "name": name, "description": description}
         response = requests.post(
-            f"{APPLIFTING_API_URL}/products/register",
+            f"{self.base_url}/products/register",
             headers=headers,
             data=json.dumps(body),
         )
@@ -76,7 +76,7 @@ class AppliftingClient:
             "Content-Type": "application/json",
         }
         response = requests.get(
-            f"{APPLIFTING_API_URL}/products/{product_uuid}/offers", headers=headers
+            f"{self.base_url}/products/{product_uuid}/offers", headers=headers
         )
         if response.status_code != 200:
             if response.status_code == 404:
