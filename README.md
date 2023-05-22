@@ -1,7 +1,23 @@
 # Product Aggregator Microservice
-Service developed as a homework assignment from Applifting
+Service developed as a homework assignment from Applifting. Purpose of this app is to register new products (whatever they are)
+and gather the offers with prices for each.
 
-## Usage
+## Dependendencies
+- `python3.11`
+- `django` + `django rest framework` -> Used for developments of the BE Application and REST API. 
+- `appscheduler` -> Used for background tasks of gathering offers
+- all other dependencies can be found in `requirements.txt`
+
+## How to use
+### Docker Environment
+- As a part of the projects, there is a Dockerfile and docker-compose.yaml, so that the app can be run without 
+need to setup the local environment. 
+- Only necessary things to be install is [Docker](https://docs.docker.com/engine/install/).
+- Then just navigate to the top folder and run:
+```bash
+docker-compose build && docker-compose up
+```
+
 ### Local Environment
 #### PostgreSQL Setup
 - Creating the PostgreSQL Database and User
@@ -31,11 +47,48 @@ python3 -m pip install -r requirements.txt
 ```bash
 python3 manage.py migrate 
 ```
+- Before the start of the application, make sure you have Environment Variable `APPLIFTING_SERVICE_BASE_URL` 
+set to the Offer Microservice base URL (https://python.exercise.applifting.cz/api/v1)
+
 - Start the application
 ```bash
 python3 manage.py runserver 
 ```
-- Enjoy!
+### After your environment is ready and app running
+- First things first, as the application has the TokenAuthentication enabled, user has to register:
+```bash
+curl --location --request POST 'http://127.0.0.1:8000/auth/registration/' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "username": "daniel.klic",
+    "password": "klic"
+}'
+```
+Response:
+```json
+{
+    "message": "User successfully created!",
+    "username": "daniel.klicx"
+}
+```
+- After the registration, user must obtain an authentication token as follows:
+```bash
+curl --location --request POST 'http://127.0.0.1:8000/auth/api-token/' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "username": "daniel.klic@rossum.ai",
+    "password": "klic"
+}'
+```
+Response
+```json
+{
+    "token": "dca5e4e620a5772f14eee427e59c7cd8d42062dc"
+}
+```
+- With this token inserted into the header as `"Authentication": "Token dca5e4e620a5772f14eee427e59c7cd8d42062dc"`
+can user discover the beauty of the other calls of the API.
+- For that purpose there is a SwaggerUI and Redoc documentation available on `/api/docs/swagger` or `/api/docs/redoc/`
 
 ## Assignment overview
 Create a REST API JSON Python microservice which allows users to browse a product catalog and which automatically updates prices from the offer service, provided by appligting.
