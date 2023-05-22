@@ -67,8 +67,7 @@ class AppliftingClient:
             headers=headers,
             data=json.dumps(body),
         )
-        if response.status_code != 201:
-            raise AppliftingException(response.text, response.status_code)
+        response.raise_for_status()
 
     def get_product_offers(self, product_uuid: str) -> list[dict[str, str]]:
         headers = {
